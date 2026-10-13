@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IGCSE Computer Science 9 · Mr. Gilbert</title>
+  <meta name="description" content="IGCSE Computer Science (0478) Grade 9 with Mr. Gilbert — topics, videos, weekly plan, secure quizzes, tests and your personal progress tracker.">
+  <link rel="icon" href="images/mr-gilbert.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo"><img class="mr-g" alt="Mr. Gilbert"></div>
+        <div><div class="brand-name" id="brandName">IGCSE CS 9</div><div class="brand-sub" id="brandSub">with Mr. Gilbert</div></div>
+      </div>
+      <div class="sem-toggle" id="semToggle"></div>
+      <nav class="menu" id="menu">
+        <a href="#home" data-r="home"><span class="k">🏠</span>Home</a>
+        <a href="#plan" data-r="plan"><span class="k">🗓️</span>Weekly plan</a>
+        <a href="#calendar" data-r="calendar"><span class="k">📝</span>Assessments</a>
+        <a href="#resources" data-r="resources"><span class="k">📚</span>Topics</a>
+        <a href="#videos" data-r="videos"><span class="k">🎬</span>Videos</a>
+        <a href="#results" data-r="results"><span class="k">📈</span>My results</a>
+        <a href="#help" data-r="help"><span class="k">💬</span>Help</a>
+      </nav>
+      <div class="side-foot" id="sideFoot" title="Switch student / my data">
+        <div class="avatar" id="avatar">?</div>
+        <div><div class="who" id="whoName">Student</div><div class="role" id="whoRole">Student</div></div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn hamburger" id="hamburger" aria-label="Open menu">☰</button>
+        <div class="crumb" id="crumb">Home</div>
+        <div class="top-actions">
+          <button class="icon-btn" id="syncBtn" title="Saving & syncing" aria-label="Saving and syncing">☁️<span class="dot" id="syncDot" hidden></span></button>
+        </div>
+      </header>
+      <div class="exam-bar" id="examBar" hidden><span class="exam-lock">🔒 Secure test mode</span><span id="examWho"></span><span class="exam-rule">Stay on this screen · no copying · no screenshots</span></div>
+      <main class="content" id="view"></main>
+      <footer class="signature"><img class="mr-g" alt="">Made with 💛 by <b>Mr. Gilbert</b> · IGCSE Computer Science 9</footer>
+    </div>
+  </div>
+  <div class="tooltip" id="tooltip"></div>
+  <div class="shield" id="shield" hidden><div><div class="shield-ic">🙈</div><b>Screen hidden</b><p>Questions are hidden while this window isn't in focus.<br>Click here to carry on — and stay on this screen.</p></div></div>
+  <div class="print-block">Printing is not allowed during a test.</div>
+
+  <script src="js/config.js"></script>
+  <script src="js/helpers.js"></script>
+  <script src="js/content-ch1.js"></script>
+  <script src="js/content-ch2.js"></script>
+  <script src="js/content-ch3.js"></script>
+  <script src="js/content-ch4.js"></script>
+  <script src="js/content-ch5.js"></script>
+  <script src="js/bank-ch1.js"></script>
+  <script src="js/bank-ch2.js"></script>
+  <script src="js/bank-ch3.js"></script>
+  <script src="js/bank-ch4.js"></script>
+  <script src="js/bank-ch5.js"></script>
+  <script src="js/generators.js"></script>
+  <script src="js/glossary.js"></script>
+  <script src="js/videos.js"></script>
+  <script>window.TEACHER_AVATAR = "images/mr-gilbert.png";</script>
+  <script src="js/app.js"></script>
+</body>
+</html>
