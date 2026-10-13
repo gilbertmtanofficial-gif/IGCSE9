@@ -4262,7 +4262,7 @@ window.VIDEO_SEARCH = {
     if (QZ && !QZ.done && QZ.quiz === kind + ":" + id) return drawQ();
     if (lockActive()) { showLockOverlay(); return; }
     const prev = attemptsFor(kind + ":" + id), I = C.integrity || {};
-    const fsOK = !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+    const fsOK = !MOBILE && !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
     view.innerHTML = `<div class="quiz-wrap guide"><a class="link" href="${m.back}">← Back</a>
       <div class="card mt guide-card">
         <div class="eyebrow">${kindName(m.qkind)} · read everything before you start</div><h1 class="h-lg mt-s">${esc(m.title)}</h1>
@@ -4285,7 +4285,7 @@ window.VIDEO_SEARCH = {
           ${I.lockOnTabLeave !== false ? `<li>🚫 Leaving this tab, switching to another app or window, or opening a new tab.</li>` : ""}
           ${I.requireFullscreen !== false && fsOK ? `<li>🚫 Leaving full screen (pressing Esc or F11).</li>` : ""}
           <li>🚫 Copying, cutting or pasting anything, or right-clicking.</li>
-          ${I.lockOnScreenshot !== false ? `<li>🚫 Taking a screenshot or screen recording (Print Screen, Windows + Shift + S, Cmd + Shift + 3/4/5, Snipping Tool, three-finger screenshot).</li>` : ""}
+          ${I.lockOnScreenshot !== false ? `<li>🚫 Taking a screenshot or screen recording (Print Screen, Windows + Shift + S, Cmd + Shift + 3/4/5, Snipping Tool).</li>` : ""}
           <li>🚫 Opening developer tools, printing, or refreshing / closing the page before you finish.</li>
         </ul>
         <div class="banner warn-banner"><b>If your device locks:</b> the test is submitted straight away (unanswered questions count as wrong), an alarm sounds, and the screen stays locked until <b>${esc(T)}</b> unlocks it. The lock is recorded${C.googleSheetsUrl ? " and sent to your teacher" : ""}. Refreshing, closing the browser or switching student will <b>not</b> remove it.</div>
@@ -4585,6 +4585,10 @@ window.VIDEO_SEARCH = {
        – Only a SHA-256 fingerprint of the teacher password is stored in the site's files. */
   const I = Object.assign({ lockOnTabLeave: true, blurGraceMs: 600, requireFullscreen: true, blockCopyPaste: true, screenshotShield: true, lockOnScreenshot: true, watermark: true }, C.integrity || {});
   const LOCK_KEY = "igcse9_device_lock";
+  // iPads (which report themselves as Macs), iPhones and Android tablets/phones need gentler rules:
+  // their browsers leave full screen on a swipe, fire focus changes while scrolling, and a resting palm counts as extra fingers.
+  const UA = navigator.userAgent || "";
+  const MOBILE = /iPad|iPhone|iPod|Android/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
   const LOCK_CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I so it is easy to read aloud
   const sha = s => window.SHA256(String(s));
   const randomLockCode = () => { const p = () => LOCK_CODE_CHARS[Math.floor(Math.random() * LOCK_CODE_CHARS.length)]; return [0, 0, 0, 0].map(p).join("") + "-" + [0, 0, 0, 0].map(p).join(""); };
@@ -4619,7 +4623,7 @@ window.VIDEO_SEARCH = {
     secure = true; document.body.classList.add("secure");
     $("#examBar").hidden = false; $("#examWho").textContent = P ? `${P.name} · ${P.cls}` : "";
     const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (I.requireFullscreen && req) {
+    if (I.requireFullscreen && req && !MOBILE) {
       try { await req.call(el); fsEntered = true; } catch (e) { fsEntered = false; }
       if (!fsEntered && !document.fullscreenElement && !document.webkitFullscreenElement) {
         // the browser refused full screen (e.g. some tablets) — carry on without it
@@ -4789,7 +4793,7 @@ window.VIDEO_SEARCH = {
   window.addEventListener("blur", () => {
     if (!isQuizActive()) return;
     showShield("blur");
-    if (!I.lockOnTabLeave) return;
+    if (!I.lockOnTabLeave || MOBILE) return; // on tablets/phones, leaving the app is caught by visibilitychange instead
     clearTimeout(blurTimer);
     blurTimer = setTimeout(() => { if (isQuizActive() && !document.hasFocus()) triggerLock("You left the test window (another app, window, tab or screenshot tool was opened)."); }, I.blurGraceMs);
   });
@@ -4804,18 +4808,18 @@ window.VIDEO_SEARCH = {
   ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
     const inFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
     if (inFs) { fsEntered = true; return; }
-    if (fsEntered && isQuizActive() && !leavingFsOnPurpose && I.requireFullscreen) triggerLock("You left full screen during a test.");
+    if (fsEntered && isQuizActive() && !leavingFsOnPurpose && I.requireFullscreen && !MOBILE) triggerLock("You left full screen during a test.");
   }));
   // mouse leaving the page (towards another window or a snipping tool): hide the questions
   document.documentElement.addEventListener("mouseleave", () => { if (isQuizActive()) showShield("mouse"); });
   document.documentElement.addEventListener("mouseenter", () => hideShield("mouse"));
   // three-finger screenshot gesture on some phones/tablets
-  document.addEventListener("touchstart", e => { if (isQuizActive() && e.touches && e.touches.length >= 3) { e.preventDefault(); showShield("touch"); if (I.lockOnScreenshot) triggerLock("A three-finger screenshot gesture was detected during a test."); } }, { passive: false });
+  document.addEventListener("touchstart", e => { if (!MOBILE && isQuizActive() && e.touches && e.touches.length >= 3) { e.preventDefault(); showShield("touch"); if (I.lockOnScreenshot) triggerLock("A three-finger screenshot gesture was detected during a test."); } }, { passive: false });
   // printing
   window.addEventListener("beforeprint", () => { if (isQuizActive()) triggerLock("Printing was attempted during a test."); });
 
   /* ---------------- init ---------------- */
-  $("#shield").addEventListener("click", () => { if (document.hasFocus()) hideShield(true); });
+  $("#shield").addEventListener("click", () => { if (document.hasFocus() || MOBILE) hideShield(true); });
   if (lockActive()) showLockOverlay();
   if (DB.current && DB.profiles[DB.current]) { useProfile(DB.current); afterLogin(); }
   else if (location.hash.startsWith("#teacher")) render();
