@@ -594,6 +594,31 @@ body.locked .app { filter: blur(14px); pointer-events: none; }
 .lock-card, .lock-card p, .lock-card .lock-detail { color: var(--ink); }
 .lock-card .sub { color: var(--ink-2); }
 .score-hero .tag { white-space: normal; display: inline-block; max-width: 100%; }
+/* pacing guide */
+.pace-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+.progress.big { height: 12px; margin-top: 6px; }
+.ms-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 10px; }
+.ms { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; background: #fff; display: flex; flex-direction: column; gap: 3px; }
+.ms.exam { border-color: var(--bad); background: #fff5f7; }
+.ms.unit { border-color: var(--gold); background: #fffaf0; }
+.ms.done { border-color: var(--good); background: var(--good-l); }
+.ms.missed { opacity: .8; }
+.ms-l { font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gold-d); }
+.ms.exam .ms-l { color: var(--bad); }
+.ms-t { font-weight: 800; font-size: 14.5px; line-height: 1.25; }
+.ms-d { font-size: 12.5px; color: var(--ink-2); }
+.ms-s { margin-top: 4px; }
+table.pace td { vertical-align: top; }
+table.pace td.c { text-align: center; font-size: 18px; }
+table.pace a { text-decoration: none; color: var(--ink); }
+table.pace a:hover { text-decoration: underline; }
+table.pace tr.now-row td { background: #fff8e1; }
+table.pace tr.now-row td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
+table.pace tr.exam-row td { background: #fff5f7; }
+table.pace tr.extra-row td { background: #f2fbf6; }
+.here { font-size: 10.5px; font-weight: 800; color: var(--gold-d); text-transform: uppercase; white-space: nowrap; }
+.pace-legend span { margin-right: 16px; font-weight: 700; color: var(--on-bg); }
+@media (max-width: 760px) { .pace-bars { grid-template-columns: 1fr; } }
 
 </style>
 </head>
@@ -607,6 +632,7 @@ body.locked .app { filter: blur(14px); pointer-events: none; }
       <div class="sem-toggle" id="semToggle"></div>
       <nav class="menu" id="menu">
         <a href="#home" data-r="home"><span class="k">🏠</span>Home</a>
+        <a href="#pacing" data-r="pacing"><span class="k">🧭</span>Pacing guide</a>
         <a href="#plan" data-r="plan"><span class="k">🗓️</span>Weekly plan</a>
         <a href="#calendar" data-r="calendar"><span class="k">📝</span>Assessments</a>
         <a href="#resources" data-r="resources"><span class="k">📚</span>Topics</a>
@@ -653,14 +679,15 @@ window.CONFIG = {
 
   /* Shown on every student's Home page. Change it each week. */
   teacherNote: {
-    text: "Welcome to IGCSE Computer Science! Read each topic carefully and watch the videos before you try the quiz. Aim for 70% or more, and retry any quiz you did not pass. Every try gives you new questions. Remember: tests are locked down, so read the rules before you start."
+    text: "Welcome to IGCSE Computer Science! Read each topic carefully and watch the videos before you try the quiz. Aim for 85% or more (grade A), and retry any quiz you did not pass. Every try gives you new questions. Remember: tests are locked down, so read the rules before you start."
   },
 
   /* Paste your Google Apps Script Web App URL here (see README.md).
      Leave as "" to save results only in the student's browser. */
   googleSheetsUrl: "",
 
-  passMark: 70,               // % needed to count a topic as "passed"
+  passMark: 85,               // % needed to count a topic as "passed" (target: Cambridge grade A)
+  passLabel: "Grade A target",
   secondsPerQuestion: 45,     // timer for a normal question
   secondsPerCalculation: 90,  // timer for calculation / trace questions (binary, file sizes, trace tables…)
   questionsPerQuiz: 20,       // topic quizzes
@@ -688,44 +715,49 @@ window.CONFIG = {
       { week: 2,  topics: ["1.2"] },
       { week: 3,  topics: ["1.3"] },
       { week: 4,  topics: ["1.4"] },
-      { week: 5,  topics: ["1.5", "1.6", "1.7"], unitTest: "u1" },
+      { week: 5,  topics: ["1.5", "1.6", "1.7"], unitTest: "u1", label: "CA1 · A1" },
       { week: 6,  topics: ["2.1", "2.2"] },
-      { week: 7,  topics: ["2.3", "2.4"], unitTest: "u2" },
-      { week: 8,  topics: [], exam: { id: "MID-S1", title: "Mid-semester exam", units: ["u1", "u2"] } },
+      { week: 7,  topics: ["2.3", "2.4"], unitTest: "u2", label: "CA1 · A2" },
+      { week: 8,  topics: [], exam: { id: "MID-S1", title: "Mid-semester exam", units: ["u1", "u2"] }, label: "CA1 · Mid-semester" },
       { week: 9,  topics: ["3.1"] },
       { week: 10, topics: ["3.2"] },
       { week: 11, topics: ["3.3"] },
       { week: 12, topics: ["3.4"] },
       { week: 13, topics: ["3.5"] },
       { week: 14, topics: ["3.6"] },
-      { week: 15, topics: ["3.7"], unitTest: "u3" },
-      { week: 16, start: "2027-01-04", topics: [], exam: { id: "END-S1", title: "End of semester exam", units: ["u1", "u2", "u3"] } }
+      { week: 15, topics: ["3.7"], unitTest: "u3", label: "CA1 · A3" },
+      { week: 16, start: "2027-01-04", topics: [], exam: { id: "END-S1", title: "End of semester exam", units: ["u1", "u2", "u3"] }, label: "End of semester" }
     ],
     2: [
       { week: 1,  topics: ["4.1"] },
       { week: 2,  topics: ["4.2"] },
-      { week: 3,  topics: ["4.3"], test: { id: "UT-ARCH", title: "End unit test: Computer architecture", topics: ["4.1", "4.2", "4.3"] } },
+      { week: 3,  topics: ["4.3"], test: { id: "UT-ARCH", title: "End unit test: Computer architecture", topics: ["4.1", "4.2", "4.3"] }, label: "CA2 · A1" },
       { week: 4,  topics: ["4.4", "4.5"] },
       { week: 5,  topics: ["4.6"] },
       { week: 6,  topics: ["4.7"] },
       { week: 7,  topics: ["4.8"] },
       { week: 8,  topics: ["4.9"] },
       { week: 9,  topics: ["4.10"] },
-      { week: 10, topics: ["4.11"], test: { id: "UT-SIO", title: "End unit test: Storage & input/output", topics: ["4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10", "4.11"] } },
-      { week: 11, topics: [], exam: { id: "MID-S2", title: "Mid-semester exam", units: ["u4"] } },
+      { week: 10, topics: ["4.11"], test: { id: "UT-SIO", title: "End unit test: Storage & input/output", topics: ["4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10", "4.11"] }, label: "CA2 · A2" },
+      { week: 11, topics: [], exam: { id: "MID-S2", title: "Mid-semester exam", units: ["u4"] }, label: "CA2 · Mid-semester" },
       { week: 12, topics: ["5.1"] },
       { week: 13, topics: ["5.2"] },
       { week: 14, topics: ["5.3"] },
-      { week: 15, topics: ["5.4"], unitTest: "u5" },
+      { week: 15, topics: ["5.4"], unitTest: "u5", label: "Chapter test" },
       { week: 16, topics: ["6.1"] },
-      { week: 17, topics: ["6.2"], unitTest: "u6" },
-      { week: 18, topics: [], exam: { id: "END-YEAR", title: "End of year exam", units: ["u1", "u2", "u3", "u4", "u5", "u6"] } }
+      { week: 17, topics: ["6.2"], unitTest: "u6", label: "CA2 · A3" },
+      { week: 18, topics: [], exam: { id: "END-YEAR", title: "End of year exam", units: ["u1", "u2", "u3", "u4", "u5", "u6"] }, label: "End of year" }
     ]
   },
 
   /* Spot checks and tests open on their date, OR earlier once the student has
      tried every topic quiz they cover. Exams only open on their date. */
   openSpotEarly: true,
+
+  /* Shown at the bottom of the Pacing guide (from the curriculum overview). */
+  pacingExtras: [
+    { sem: 2, title: "Project / problem solving / research / coding challenge", note: "Optional (no MOET) — after the end-of-year exam" }
+  ],
 
   /* ===================== EXAM INTEGRITY (tests are locked down) =====================
      Any of these during a quiz, test or exam LOCKS this device until you unlock it:
@@ -3831,6 +3863,7 @@ window.VIDEO_SEARCH = {
       else if (w.test) { assess = { id: w.test.id, kind: "unit", title: w.test.title, sub: w.test.topics.map(id => TOPICS[id] ? id + " " + TOPICS[id].title : id).join(" · "), date: fri, topics: w.test.topics, n: w.test.n || C.questionsPerUnitTest, sem }; }
       else if (w.unitTest) { const u = unitById(w.unitTest); assess = { id: "UT-" + w.unitTest, kind: "unit", title: `End of chapter ${u.num} test`, sub: u.title, date: fri, topics: u.topics.map(t => t.id), n: C.questionsPerUnitTest, sem }; }
       else assess = { id: `SC-${sem}-${w.week}`, kind: "spot", title: `Week ${w.week} spot check`, sub: w.topics.map(id => TOPICS[id] ? TOPICS[id].title : id).join(" · "), date: fri, topics: w.topics, n: C.questionsPerSpot, sem };
+      assess.label = w.label || "";
       return Object.assign({}, w, { start, end: addDays(start, 6), fri, assess, sem });
     });
   }
@@ -3941,6 +3974,7 @@ window.VIDEO_SEARCH = {
       case "results": chrome("results"); crumb("My results"); return vResults(a);
       case "videos": chrome("videos"); crumb("Videos"); return vVideos();
       case "help": chrome("help"); crumb("Help"); return vHelp();
+      case "pacing": chrome("pacing"); crumb("Pacing guide"); return vPacing();
       default: chrome("home"); crumb("Home"); return vHome();
     }
   }
@@ -3978,7 +4012,7 @@ window.VIDEO_SEARCH = {
         <div class="card stat c3"><div class="head"><span class="ico">⏱️</span><a class="link" href="#results">Results →</a></div><div class="num">${hours(P.time.total || 0)}h</div><div class="lbl">Study time</div><div class="cap">${fmtTime(wk)} in the last 7 days</div></div>
         <div class="card stat c4"><div class="head"><span class="ico">🏆</span><a class="link" href="#results">Results →</a></div><div class="num">${P.attempts.length ? Math.max(...P.attempts.map(a => a.pct)) + "%" : "—"}</div><div class="lbl">Best score</div><div class="cap">${P.attempts.length} quiz tr${P.attempts.length === 1 ? "y" : "ies"} so far</div></div>
       </div>
-      ${cw ? `<div class="section"><div class="section-head"><div><div class="eyebrow">This week</div><h2 class="h-lg">${cw.state === "before" ? "Coming up first" : cw.state === "after" ? "Last scheduled week" : "What we're learning now"}</h2></div><a class="link" href="#plan">Full plan →</a></div>${nowCard(cw)}</div>` : ""}
+      ${cw ? `<div class="section"><div class="section-head"><div><div class="eyebrow">This week</div><h2 class="h-lg">${cw.state === "before" ? "Coming up first" : cw.state === "after" ? "Last scheduled week" : "What we're learning now"}</h2></div><span class="row" style="gap:14px"><a class="link" href="#pacing">Pacing guide →</a><a class="link" href="#plan">Full plan →</a></span></div>${nowCard(cw)}</div>` : ""}
       <div class="section card">
         <div class="row" style="justify-content:space-between;align-items:flex-start"><div><div class="eyebrow">My to-do list</div><h2 class="h-lg">${open ? open + " thing" + (open === 1 ? "" : "s") + " to do" : "All done! 🎉"}</h2><div class="sub small">Topics to pass, open assessments and your own reminders.</div></div>${open ? `<div class="count-badge">${open}</div>` : ""}</div>
         <form class="task-row" id="taskForm"><input class="input" id="taskIn" placeholder="Add your own reminder (e.g. revise trace tables)" maxlength="120"><button class="btn" type="submit">＋ Add</button></form>
@@ -4235,7 +4269,7 @@ window.VIDEO_SEARCH = {
         <div class="guide-facts">
           <div><b>${m.n}</b><span>questions</span></div>
           <div><b>${C.secondsPerQuestion}–${C.secondsPerCalculation + 60}s</b><span>timer on each question</span></div>
-          <div><b>${C.passMark}%</b><span>pass mark</span></div>
+          <div><b>${C.passMark}%</b><span>pass mark${C.passLabel ? " · " + esc(C.passLabel) : ""}</span></div>
           <div><b>${prev.length}</b><span>tries so far${prev.length ? " · best " + best(kind + ":" + id) + "%" : ""}</span></div>
         </div>
         <h3 class="h-md mt">1. How the test works</h3>
@@ -4360,7 +4394,7 @@ window.VIDEO_SEARCH = {
     const [k, id] = att.quiz.split(":");
     if (pass) confetti();
     view.innerHTML = `<div class="quiz-wrap"><div class="card score-hero"><div class="score-face"><img src="${AV}" alt="${esc(T)}"></div><div class="eyebrow">${esc(QZ.title)}</div><div class="score-big">${att.pct}%</div><div class="h-md">${att.score} out of ${att.total} correct</div>
-      <p class="mt">${pass ? `<span class="tag good">🎉 Passed! ${esc(T)} is proud of you!</span>` : `<span class="tag warn">💪 Keep going — you need ${C.passMark}% to pass. You've got this!</span>`}</p>
+      <p class="mt">${pass ? `<span class="tag good">🎉 Passed — ${esc(C.passLabel || "well done")}! ${esc(T)} is proud of you!</span>` : `<span class="tag warn">💪 Keep going — you need ${C.passMark}%${C.passLabel ? " (" + esc(C.passLabel) + ")" : ""} to pass. You've got this!</span>`}</p>
       <p class="sub">${diff == null ? "This is your first try. Your next try will have new questions." : `${diff > 0 ? "▲ " + diff + " points better than" : diff < 0 ? "▼ " + (-diff) + " points lower than" : "The same as"} your last try.`} ${proj != null ? ` Trend: ${tr.slope > 2 ? "improving" : tr.slope < -2 ? "declining" : "steady"} · projected next try ≈ <b>${proj}%</b>.` : ""}</p>
       <div class="row mt" style="justify-content:center"><a class="btn primary" href="#quiz/${k}/${encodeURIComponent(id)}" id="again">Try again (new questions)</a><a class="btn" href="${QZ.back}">Back</a><a class="btn" href="#results/${encodeURIComponent(att.quiz)}">My progress graph</a></div></div>
       <div class="card mt"><h3 class="h-md">Review your answers</h3>${QZ.answers.map((a, i) => `<div class="review-item"><div class="q">${a.ok ? '<span class="up">✓</span>' : '<span class="down">✗</span>'} ${i + 1}. ${esc(a.q.prompt)}</div>${a.q.code ? `<pre class="q-code">${esc(a.q.code)}</pre>` : ""}
@@ -4374,7 +4408,7 @@ window.VIDEO_SEARCH = {
     const X = i => l + (n + ext <= 1 ? (W - l - r) / 2 : i * (W - l - r) / (n + ext - 1)), Y = v => t + (100 - v) * (H - t - b) / 100;
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scores per try with trend line">`;
     [0, 25, 50, 75, 100].forEach(v => { s += `<line x1="${l}" x2="${W - r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}%</text>`; });
-    s += `<line x1="${l}" x2="${W - r}" y1="${Y(C.passMark)}" y2="${Y(C.passMark)}" stroke="var(--good)" stroke-width="1.5" stroke-dasharray="4 4"/><text x="${W - r}" y="${Y(C.passMark) - 6}" text-anchor="end" font-size="11" fill="var(--good)" font-weight="700">Pass ${C.passMark}%</text>`;
+    s += `<line x1="${l}" x2="${W - r}" y1="${Y(C.passMark)}" y2="${Y(C.passMark)}" stroke="var(--good)" stroke-width="1.5" stroke-dasharray="4 4"/><text x="${W - r}" y="${Y(C.passMark) - 6}" text-anchor="end" font-size="11" fill="var(--good)" font-weight="700">Pass ${C.passMark}% (A)</text>`;
     if (n >= 2) { const tr = trend(vals); s += `<line x1="${X(0)}" y1="${Y(tr.at(0))}" x2="${X(n - 1)}" y2="${Y(tr.at(n - 1))}" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/><line x1="${X(n - 1)}" y1="${Y(tr.at(n - 1))}" x2="${X(n - 1 + ext)}" y2="${Y(tr.at(n - 1 + ext))}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 5"/>`;
       for (let k = 1; k <= ext; k++) { const v = Math.round(tr.at(n - 1 + k)); s += `<circle cx="${X(n - 1 + k)}" cy="${Y(v)}" r="5" fill="#fff" stroke="var(--accent)" stroke-width="2" data-tip="Projected try ${n + k}: ≈${v}%"/>`; }
       s += `<text x="${X(n - 1 + ext)}" y="${Y(tr.at(n - 1 + ext)) - 12}" text-anchor="end" font-size="11.5" fill="var(--accent)" font-weight="700">Projection</text>`; }
@@ -4429,13 +4463,47 @@ window.VIDEO_SEARCH = {
     download(`${P.name.replace(/\s+/g, "_")}_${P.cls}_results.csv`, lines.join("\n"), "text/csv");
   }
 
+  /* ================= PACING GUIDE ================= */
+  function vPacing() {
+    const t = today();
+    const sems = C.semesters.map(se => {
+      const ws = schedule(se.id); if (!ws.length) return "";
+      const first = ws[0].start, last = ws[ws.length - 1].end;
+      const topicsAll = ws.flatMap(w => w.topics), passedN = topicsAll.filter(passed).length;
+      const nowW = ws.find(w => t >= w.start && t <= w.end);
+      const pctTime = t < first ? 0 : t > last ? 100 : Math.round((t - first) / (last - first) * 100);
+      const pctDone = topicsAll.length ? Math.round(passedN / topicsAll.length * 100) : 0;
+      const key = ws.filter(w => w.assess.kind !== "spot");
+      const strip = key.map(w => { const a = w.assess, done = attemptsFor("A:" + a.id).length, b = best("A:" + a.id);
+        return `<div class="ms ${a.kind} ${done ? "done" : a.date < t ? "missed" : ""}"><div class="ms-l">${esc(a.label || kindName(a.kind))}</div><div class="ms-t">${esc(a.title.replace(/^End unit test: /, ""))}</div><div class="ms-d">Week ${w.week} · ${fmtD(a.date, { weekday: "short", day: "numeric", month: "short" })}</div><div class="ms-s">${done ? `<span class="tag sm ${b >= C.passMark ? "good" : "warn"}">Best ${b}%</span>` : assessOpen(a) ? `<a class="btn sm accent" href="#quiz/A/${a.id}">Start</a>` : `<span class="tag sm">${a.date < t ? "Missed" : "Upcoming"}</span>`}</div></div>`; }).join("");
+      const rows = ws.map(w => {
+        const st = weekStatus(w), isNow = nowW && nowW.week === w.week, u = UNIT_OF[w.topics[0]];
+        const icon = { done: "✅", overdue: "⏰", current: "📍", upcoming: "⬜" }[st];
+        return `<tr class="${isNow ? "now-row" : ""} ${w.assess.kind === "exam" ? "exam-row" : ""}"><td class="n"><b>${w.week}</b>${isNow ? '<div class="here">You are here</div>' : ""}</td><td class="small" style="white-space:nowrap">${fmtD(w.start)} – ${fmtD(addDays(w.start, 4))}</td>
+          <td>${u ? `<div class="small muted">Chapter ${u.num} · ${esc(u.title)}</div>` : ""}${w.topics.length ? w.topics.map(id => `<div><a href="#topic/${encodeURIComponent(id)}"><b>${id}</b> ${esc(TOPICS[id].title)}</a> ${stateTag(id)}</div>`).join("") : `<div class="muted">Revision week</div>`}</td>
+          <td><b>${esc(w.assess.title)}</b>${w.assess.label ? ` <span class="tag sm accent">${esc(w.assess.label)}</span>` : ""}<div class="small muted">${kindName(w.assess.kind)} · ${w.assess.n} Qs · Fri ${fmtD(w.assess.date)}</div></td>
+          <td class="c">${icon}</td></tr>`;
+      }).join("");
+      const extras = (C.pacingExtras || []).filter(x => x.sem === se.id).map(x => `<tr class="extra-row"><td class="n">★</td><td></td><td colspan="2"><b>${esc(x.title)}</b><div class="small muted">${esc(x.note || "")}</div></td><td></td></tr>`).join("");
+      return `<div class="section card"><div class="row" style="justify-content:space-between;align-items:flex-end"><div><div class="eyebrow">${esc(se.name)} · ${fmtD(first, { day: "numeric", month: "short", year: "numeric" })} – ${fmtD(last, { day: "numeric", month: "short", year: "numeric" })}</div><h2 class="h-lg">${se.id === 1 ? "Continual assessment 1 · Term 1" : "Continual assessment 2 · Term 2"}</h2></div></div>
+        <div class="pace-bars"><div><div class="small"><b>Time through the semester</b> · ${pctTime}%</div><div class="progress big"><i style="width:${pctTime}%;background:linear-gradient(90deg,#8790a6,#b7c3de)"></i></div></div>
+        <div><div class="small"><b>Topics you've passed</b> · ${passedN}/${topicsAll.length} (${pctDone}%)</div><div class="progress big"><i style="width:${pctDone}%"></i></div></div></div>
+        <p class="small mt-s">${pctDone >= pctTime ? "👍 You're on track or ahead of the plan." : `⚠️ You're behind the plan — catch up on the ⏰ weeks below.`}</p>
+        <h3 class="h-md mt">Key assessments</h3><div class="ms-strip">${strip}</div>
+        <h3 class="h-md mt">Week by week</h3><div class="table-wrap mt-s"><table class="data-table pace"><tr><th>Wk</th><th>Dates</th><th>Topics to finish</th><th>Friday assessment</th><th></th></tr>${rows}${extras}</table></div></div>`;
+    }).join("");
+    view.innerHTML = `<div class="eyebrow">Whole year</div><h1 class="h-xl">Pacing guide 🧭</h1><div class="sub">What we cover each week, when every test and exam happens, and how you're doing against the plan. Pass mark: <b>${C.passMark}%</b>${C.passLabel ? " (" + esc(C.passLabel) + ")" : ""}.</div>
+      <div class="section legend pace-legend"><span>✅ Done</span><span>📍 This week</span><span>⏰ Overdue</span><span>⬜ Coming up</span></div>${sems}`;
+    const nr = view.querySelector(".now-row"); if (nr) setTimeout(() => nr.scrollIntoView({ block: "center", behavior: "smooth" }), 150);
+  }
+
   /* ================= HELP ================= */
   function vHelp() {
     view.innerHTML = `<div class="eyebrow">Help</div><h1 class="h-xl">How this site works 💬</h1>
       <div class="section card help">
         <h4>1. Follow your weekly plan</h4><p>Each week lists the topics you must finish. Open a topic in <b>Topics</b>, read it carefully (the textbook pages are shown too), and press <b>Mark as read</b>.</p>
         <h4>🎬 Watch the videos</h4><p>Topics have short videos linked to the syllabus objectives. Find them on the topic page or in <b>Videos</b>. Watching counts towards your study time.</p>
-        <h4>2. Pass the topic quiz</h4><p>Every topic has a ${C.questionsPerQuiz}-question quiz. You need <b>${C.passMark}%</b> to pass. Each question has its <b>own timer</b> (longer for calculations) and you <b>can't skip</b>. Every try gives <b>new questions, new numbers and different question types</b>, so retrying is real practice.</p>
+        <h4>2. Pass the topic quiz</h4><p>Every topic has a ${C.questionsPerQuiz}-question quiz. You need <b>${C.passMark}%</b> to pass${C.passLabel ? " — that's the " + esc(C.passLabel) : ""}. Each question has its <b>own timer</b> (longer for calculations) and you <b>can't skip</b>. Every try gives <b>new questions, new numbers and different question types</b>, so retrying is real practice.</p>
         <h4>3. Spot checks, end-unit tests and exams</h4><p>Most Fridays there is a spot check on that week's topics. At the end of a unit there is a ${C.questionsPerUnitTest}-question end-unit test, and there are ${C.questionsPerExam}-question mid-semester, end-of-semester and end-of-year exams. Find them all in <b>Assessments</b>.</p>
         <h4>🔒 Secure test mode</h4><p>Every quiz, test and exam runs in secure test mode. Before you start you will see the full rules and must tick that you agree. During the test:</p>
         <ul><li>Stay on the test tab. Leaving the tab, switching app or window, or opening a new tab <b>locks your device</b>.</li><li>Copying, pasting, right-clicking, screenshots, developer tools, printing and leaving full screen also lock your device.</li><li>The questions go black if the page loses focus or a screenshot key is pressed, and your name is printed faintly across each question.</li><li>A locked device can only be unlocked by ${esc(T)}. Refreshing or closing the browser does not unlock it.</li></ul>
